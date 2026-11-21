@@ -50,6 +50,30 @@ button,input{font:inherit;color:inherit}
 .btn-chico{flex:none;margin-left:auto;min-height:44px;padding:0 16px;font-size:15px;border-radius:12px;white-space:nowrap}
 .btn-chico .ico{width:19px;height:19px}
 
+/* ---------- pantalla de carga (un segundo) ---------- */
+/* el logo se da vuelta cuadrado por cuadrado y la aguja de un goniómetro recorre su escala; después se desvanece sobre la portada,
+   que es del mismo color */
+.carga{display:none}
+.con-carga{overflow:hidden}
+.con-carga .carga{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:var(--agua);transition:opacity .45s ease .1s}
+.carga-centro{display:grid;justify-items:center;gap:16px;transition:opacity .3s,transform .4s cubic-bezier(.4,0,.2,1)}
+.carga-logo{display:grid;grid-template-columns:repeat(2,52px);gap:5px;perspective:500px}
+.carga-logo span{display:grid;place-items:center;height:52px;border-radius:5px;font:400 38px/1 var(--serif);background:#fff;color:var(--petroleo);
+  box-shadow:inset 0 0 0 2px var(--petroleo);opacity:0;transform:rotateY(-90deg)}
+.carga-logo span:nth-child(2),.carga-logo span:nth-child(3){background:var(--petroleo);color:#fff}
+.carga.arranca .carga-logo span{animation:voltea .55s cubic-bezier(.2,.8,.3,1.15) forwards}
+.carga.arranca .carga-logo span:nth-child(2){animation-delay:.11s}
+.carga.arranca .carga-logo span:nth-child(3){animation-delay:.22s}
+.carga.arranca .carga-logo span:nth-child(4){animation-delay:.33s}
+@keyframes voltea{to{opacity:1;transform:none}}
+.carga-gonio{width:150px;height:auto;overflow:visible}
+.carga-gonio .pista{fill:none;stroke:rgba(255,255,255,.4);stroke-width:4;stroke-linecap:round}
+.carga-gonio .avance{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round}
+.carga-gonio .aguja{stroke:var(--abismo);stroke-width:3;stroke-linecap:round}
+.carga-gonio .eje{fill:var(--calor);stroke:#fff;stroke-width:2.5}
+.carga.sale{opacity:0;pointer-events:none}
+.carga.sale .carga-centro{opacity:0;transform:translateY(-12px) scale(.97)}
+
 /* ---------- ¿dónde te duele? ---------- */
 .mapa{background:var(--agua);padding:14px var(--borde) 44px}
 .mapa-txt .mono{opacity:.85}
@@ -95,6 +119,22 @@ button,input{font:inherit;color:inherit}
 .zona:hover{background:#fff}
 .zona[aria-pressed="true"]{background:var(--petroleo);color:#fff}
 .zona[aria-pressed="true"] i{background:#fff}
+
+/* entrada después de la carga: el texto sube, el muñeco se arma de los pies a la cabeza y se marcan los puntos.
+   Los retrasos de cada pieza (--d) y de cada botón (--i) los pone el JS. */
+.entra .mapa-txt>*{animation:sube .6s cubic-bezier(.2,.7,.2,1) both}
+.entra .mapa-txt>:nth-child(2){animation-delay:.07s}
+.entra .mapa-txt>:nth-child(3){animation-delay:.14s}
+.entra .mapa-txt>:nth-child(4){animation-delay:.21s}
+.entra .zona{animation:sube .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.25s + var(--i,0) * .045s)}
+.entra .ficha{animation:sube .6s .35s cubic-bezier(.2,.7,.2,1) both}
+.entra .cuerpo .pieza,.entra .cuerpo .art,.entra .cuerpo .sombra{animation:arma .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+.entra .punto{animation:aparece .3s both;animation-delay:var(--d,0s)}
+.entra .punto .nucleo{transform-box:fill-box;transform-origin:center;animation:marca .45s cubic-bezier(.3,1.7,.5,1) both;animation-delay:var(--d,0s)}
+@keyframes sube{from{opacity:0;transform:translateY(16px)}}
+@keyframes arma{from{opacity:0;transform:translateY(22px)}}
+@keyframes aparece{from{opacity:0}}
+@keyframes marca{from{transform:scale(0)}}
 
 .ficha{margin-top:22px;padding:24px 22px;background:#fff;border-radius:var(--radio);box-shadow:0 18px 40px -24px rgba(11,58,66,.45)}
 .ficha-dato{color:var(--petroleo)}

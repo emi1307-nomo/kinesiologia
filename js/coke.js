@@ -165,8 +165,50 @@
     };
     anim = requestAnimationFrame(paso);
   }
+  /* ---------- pantalla de carga y entrada ----------
+     Dura algo más de un segundo: el logo se da vuelta, la aguja del goniómetro recorre su escala y se desvanece.
+     Después el muñeco se arma de los pies a la cabeza, se marcan los puntos y recién ahí saluda. */
+  const raiz = document.documentElement, carga = $('.carga');
+  let terminoEntrada; const entrada = new Promise((r) => (terminoEntrada = r));
+  function prepararEntrada() {
+    // retraso de cada pieza según su altura: primero los pies, al final la cabeza
+    const piezas = $$('.pieza, .art, .sombra', cuerpo);
+    const ys = piezas.map((e) => { const b = e.getBBox(); return b.y + b.height / 2; });
+    const alto = Math.max(...ys), bajo = Math.min(...ys);
+    piezas.forEach((e, i) => e.style.setProperty('--d', ((0.55 * (alto - ys[i])) / (alto - bajo)).toFixed(3) + 's'));
+    $$('.punto', cuerpo).map((p) => [p, p.transform.baseVal.consolidate().matrix.f]).sort((a, b) => b[1] - a[1])
+      .forEach(([p], i) => p.style.setProperty('--d', (0.6 + i * 0.06).toFixed(2) + 's'));
+    $$('.zona').forEach((b, i) => b.style.setProperty('--i', i));
+  }
+  if (carga && raiz.classList.contains('con-carga')) {
+    const salir = () => {
+      if (!raiz.classList.contains('con-carga')) { terminoEntrada(); return; } // ya la sacó el seguro de los 5 segundos
+      prepararEntrada();
+      carga.classList.add('sale');
+      setTimeout(() => raiz.classList.add('entra'), 150);
+      setTimeout(() => { raiz.classList.remove('con-carga'); carga.remove(); }, 650);
+      setTimeout(() => { raiz.classList.remove('entra'); terminoEntrada(); }, 1800);
+    };
+    const avance = $('.avance', carga), aguja = $('.aguja', carga);
+    const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+    // las letras del logo, con su tipografía: si tarda, arranca igual
+    Promise.race([document.fonts.load('400 38px "Young Serif"'), esperar(450)]).then(() => {
+      carga.classList.add('arranca');
+      const DUR = 900, ANTES = 150; let t0 = 0;
+      const paso = (t) => {
+        if (!t0) t0 = t;
+        const p = Math.min(1, Math.max(0, (t - t0 - ANTES) / DUR)), e = 1 - Math.pow(1 - p, 3);
+        avance.setAttribute('stroke-dashoffset', (100 - 100 * e).toFixed(2));
+        aguja.setAttribute('transform', `rotate(${(180 * e).toFixed(1)} 70 70)`);
+        if (p < 1) requestAnimationFrame(paso);
+        else Promise.race([document.fonts.ready, esperar(1500)]).then(() => setTimeout(salir, 120));
+      };
+      requestAnimationFrame(paso);
+    });
+  } else terminoEntrada();
+
   if ('IntersectionObserver' in window) {
-    const ojo = new IntersectionObserver((es) => { if (es[0].isIntersecting) { ojo.disconnect(); setTimeout(saludar, 900); } }, { threshold: 0.6 });
+    const ojo = new IntersectionObserver((es) => { if (es[0].isIntersecting) { ojo.disconnect(); entrada.then(() => setTimeout(saludar, 400)); } }, { threshold: 0.6 });
     ojo.observe(cuerpo);
   }
 
