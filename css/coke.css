@@ -1,0 +1,248 @@
+/* COKE Córdoba · kinesiología y fisioterapia
+   Paleta sacada de su logo (turquesa de los cuadrados) + un rojo "calor" que marca dónde duele.
+   Tipografías: Young Serif (títulos, eco de las letras serif del logo), Atkinson Hyperlegible Next (texto:
+   pensada para leerse fácil, para todo tipo de paciente) y su versión mono para datos y grados. */
+:root{
+  --agua:#7CC3D5; --agua-claro:#BFE3EC; --petroleo:#0F6A76; --abismo:#0B3A42; --espuma:#EEF5F3; --calor:#F2545B;  --serif:"Young Serif",Georgia,serif;
+  --sans:"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Atkinson Hyperlegible Mono",ui-monospace,Consolas,monospace;
+  --borde:20px; --radio:18px; --cab:64px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--cab) + 12px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--espuma);color:var(--abismo);font:400 18px/1.55 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip}
+[hidden]{display:none!important}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.02;margin:0;letter-spacing:-.01em}
+p,ul,ol,blockquote,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--abismo);outline-offset:3px;border-radius:6px}
+.mono{font:700 13px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.saltar{position:absolute;left:-999px;top:8px;z-index:100;padding:10px 14px;background:#fff;border-radius:10px}
+.saltar:focus{left:12px}
+
+/* ---------- botones ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 24px;border-radius:14px;border:0;
+  font:800 17px/1.1 var(--sans);text-decoration:none;cursor:pointer;transition:background .2s,transform .2s}
+.btn:active{transform:scale(.98)}
+.btn-turno{background:var(--petroleo);color:#fff}
+.btn-turno:hover{background:var(--abismo)}
+.btn-borde{background:transparent;color:var(--abismo);box-shadow:inset 0 0 0 2px var(--abismo)}
+.btn-borde:hover{background:var(--abismo);color:#fff}
+.btn-ancho{width:100%}
+.ico{width:22px;height:22px;flex:none}
+.ico-chico{width:15px;height:15px;flex:none}
+
+/* ---------- cabecera ---------- */
+.cabecera{position:sticky;top:0;z-index:30;height:var(--cab);display:flex;align-items:center;gap:14px;padding:0 var(--borde);background:var(--agua);
+  transition:box-shadow .25s}
+.cabecera.bajo{box-shadow:0 1px 0 rgba(11,58,66,.18)}
+.marca{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:var(--petroleo)}
+.marca .logo{flex:none}
+.marca-txt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.marca .logo{width:40px;height:40px}
+.marca-txt{font:800 15px/1.15 var(--sans);color:var(--abismo)}
+.marca-txt small{display:block;font-weight:400;font-size:13px}
+.menu{display:none}
+.solo-compu{display:none}
+.btn-chico{flex:none;margin-left:auto;min-height:44px;padding:0 16px;font-size:15px;border-radius:12px;white-space:nowrap}
+.btn-chico .ico{width:19px;height:19px}
+
+/* ---------- ¿dónde te duele? ---------- */
+.mapa{background:var(--agua);padding:14px var(--borde) 44px}
+.mapa-txt .mono{opacity:.85}
+.mapa h1{font-size:clamp(46px,13.4vw,116px);margin:10px 0 14px}
+.mapa-sub{max-width:36ch}
+.calif{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:14px;font-size:15px;text-decoration:none}
+.calif b{font-weight:800}
+.estrellas{display:flex;gap:2px;color:var(--abismo)}
+.estrellas svg{width:16px;height:16px}
+
+/* figura + botones de zona lado a lado, también en el celular */
+/* el dibujo deja lugar arriba y a la derecha para cuando levanta el brazo o se inclina */
+.escena{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center;margin-top:34px}
+.cuerpo{width:100%;height:auto;max-height:62vh;overflow:visible;touch-action:manipulation}
+.cuerpo .sombra{fill:rgba(11,58,66,.16)}
+/* cada pieza lleva un filete del color del fondo: así el brazo se separa del tórax y se ven las uniones */
+.cuerpo .pieza{fill:url(#vol);stroke:var(--agua);stroke-width:2.5;stroke-linejoin:round}
+.cuerpo .art{fill:url(#bola);stroke:var(--agua);stroke-width:2}
+.cuerpo .lejos .pieza{fill:url(#vol-lejos)}
+.cuerpo .lejos .art{fill:url(#bola-lejos)}
+.punto{cursor:pointer}
+.punto .toque{fill:transparent}
+.punto .nucleo{fill:var(--calor);stroke:#fff;stroke-width:2.5;transition:fill .25s}
+.punto .pulso{fill:var(--calor);opacity:.45;transform-box:fill-box;transform-origin:center;animation:latir 2.2s ease-out infinite}
+.punto:hover .nucleo{fill:#d93a42}
+.punto.activo .nucleo{fill:#fff;stroke:var(--calor);stroke-width:3.5}
+.punto.activo .pulso{animation:none;opacity:0}
+.cuerpo.elegido .punto:not(.activo) .pulso{animation:none;opacity:0}
+.cuerpo.elegido .punto:not(.activo) .nucleo{fill:rgba(242,84,91,.55)}
+@keyframes latir{0%{transform:scale(.7);opacity:.55}80%,100%{transform:scale(2.3);opacity:0}}
+/* goniómetro */
+.gonio{pointer-events:none}
+.gonio .g-brazo{stroke:#fff;stroke-width:2.5;stroke-linecap:round}
+.gonio .g-arco{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round}
+.gonio .g-total{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:2 5;stroke-linecap:round;opacity:.8}
+.gonio rect{fill:var(--abismo)}
+.gonio text{fill:#fff;font:700 15px var(--mono)}
+
+.zonas{display:flex;flex-direction:column;gap:7px}
+.zona{display:flex;align-items:center;gap:9px;min-height:42px;padding:8px 12px;border:0;border-radius:11px;background:rgba(255,255,255,.62);
+  font:700 15px/1.15 var(--sans);text-align:left;cursor:pointer;transition:background .2s,color .2s}
+.zona i{width:9px;height:9px;border-radius:50%;background:var(--calor);flex:none}
+.zona:hover{background:#fff}
+.zona[aria-pressed="true"]{background:var(--petroleo);color:#fff}
+.zona[aria-pressed="true"] i{background:#fff}
+
+.ficha{margin-top:22px;padding:24px 22px;background:#fff;border-radius:var(--radio);box-shadow:0 18px 40px -24px rgba(11,58,66,.45)}
+.ficha-dato{color:var(--petroleo)}
+.ficha-titulo{font-size:clamp(34px,9vw,48px);margin:8px 0 12px}
+.ficha-intro{color:#2c5961}
+.ficha-lista{display:grid;gap:8px;margin:4px 0 0}
+.ficha-lista li{position:relative;padding-left:22px}
+.ficha-lista li::before{content:"";position:absolute;left:2px;top:.55em;width:10px;height:10px;border-radius:2px;background:var(--agua)}
+.ficha-cita{margin-top:18px;padding:14px 16px;border-left:4px solid var(--agua);background:var(--espuma);border-radius:0 12px 12px 0}
+.ficha-cita p{font-style:italic}
+.ficha-cita cite{display:block;margin-top:6px;font:400 14px var(--sans);font-style:normal;color:#4b7177}
+.ficha .btn{margin-top:20px;width:100%}
+.ficha.cambia{animation:asoma .35s ease-out}
+@keyframes asoma{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- opiniones ---------- */
+.opiniones{padding:56px var(--borde) 60px}
+.opiniones>h2{color:var(--petroleo)}
+.cita-grande{margin-top:14px}
+.cita-grande p{font:400 clamp(32px,8.6vw,72px)/1.06 var(--serif);max-width:18ch}
+.cita-grande cite{display:block;margin-top:12px;font:400 15px var(--sans);font-style:normal;color:#4b7177}
+.citas{display:grid;gap:12px;margin-top:30px}
+.citas blockquote{padding:20px 20px 18px;background:#fff;border-radius:var(--radio)}
+.citas cite{display:block;margin-top:10px;font:700 14px var(--sans);font-style:normal;color:var(--petroleo)}
+.link{display:inline-flex;align-items:center;gap:6px;margin-top:22px;font-weight:700;color:var(--petroleo)}
+
+/* ---------- turnos ---------- */
+.turnos{padding:56px var(--borde) 64px;background:var(--abismo);color:#EAF6F8}
+.turnos h2{font-size:clamp(42px,11vw,88px);color:#fff}
+.pasos{counter-reset:paso;display:grid;gap:16px;margin-top:22px}
+.pasos li{counter-increment:paso;position:relative;padding-left:48px;color:#c6e2e7}
+.pasos li b{color:#fff}
+.pasos li::before{content:counter(paso);position:absolute;left:0;top:-2px;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;
+  background:var(--agua);color:var(--abismo);font:700 16px var(--mono)}
+.armador{margin-top:30px;padding:22px 18px;background:#fff;color:var(--abismo);border-radius:22px}
+.armador-titulo{font-weight:700}
+.armador fieldset{margin:20px 0 0;padding:0;border:0}
+.armador legend{padding:0;margin-bottom:10px;font:700 15px var(--sans)}
+.armador legend small,.campo-nombre small{font-weight:400;color:#557a80}
+.opciones{display:flex;flex-wrap:wrap;gap:8px}
+.opciones label{position:relative}
+.opciones input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opciones span{display:block;padding:10px 14px;border-radius:10px;background:var(--espuma);font-size:15px;font-weight:700;transition:background .15s,color .15s}
+.opciones input:checked+span{background:var(--petroleo);color:#fff}
+.opciones input:focus-visible+span{outline:3px solid var(--abismo);outline-offset:2px}
+.dias span{min-width:54px;text-align:center}
+.campo-nombre{display:block;margin-top:20px;font:700 15px var(--sans)}
+.campo-nombre input{display:block;width:100%;margin-top:8px;min-height:50px;padding:0 14px;border:2px solid var(--agua-claro);border-radius:12px;background:#fff;font-weight:400}
+.campo-nombre input:focus{border-color:var(--petroleo);outline:none}
+.vista{margin-top:22px;padding:16px;background:#E6EFEC;border-radius:16px}
+.vista .mono{color:#557a80;font-size:12px}
+.burbuja{position:relative;margin-top:10px;margin-left:auto;max-width:94%;padding:12px 14px;background:#D9FDD3;color:#16302a;border-radius:14px 4px 14px 14px;
+  font-size:16px;line-height:1.45;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.armador .btn{margin-top:18px}
+.nota{margin-top:12px;font-size:14px;color:#557a80}
+
+/* ---------- qué tratamos ---------- */
+.tratamos{padding:60px var(--borde)}
+.tratamos h2,.preguntas h2{font-size:clamp(40px,10.5vw,80px)}
+.sec-intro{margin-top:12px;color:#2c5961}
+.grupos{display:grid;gap:12px;margin-top:28px}
+.grupo{padding:22px 20px;background:#fff;border-radius:var(--radio);border-top:6px solid var(--agua)}
+.grupo h3{font-size:26px}
+.grupo ul{display:grid;gap:6px;margin-top:12px}
+.grupo li{padding-left:18px;position:relative}
+.grupo li::before{content:"";position:absolute;left:0;top:.6em;width:8px;height:8px;border-radius:2px;background:var(--petroleo)}
+.grupo-consulta{display:flex;flex-direction:column;gap:12px;background:var(--abismo);color:#EAF6F8;border-top-color:var(--calor)}
+.grupo-consulta h3{color:#fff}
+.grupo-consulta .btn{margin-top:auto;background:var(--agua);color:var(--abismo)}
+.grupo-consulta .btn:hover{background:#fff}
+
+/* ---------- preguntas ---------- */
+.preguntas{padding:20px var(--borde) 60px}
+.lista-preguntas{margin-top:24px;border-top:2px solid var(--abismo)}
+.lista-preguntas details{border-bottom:1px solid rgba(11,58,66,.22)}
+.lista-preguntas summary{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;font-weight:700;cursor:pointer;list-style:none}
+.lista-preguntas summary::-webkit-details-marker{display:none}
+.lista-preguntas summary::after{content:"";flex:none;width:12px;height:12px;border-right:2.5px solid var(--petroleo);border-bottom:2.5px solid var(--petroleo);
+  transform:rotate(45deg) translate(-3px,-3px);transition:transform .2s}
+.lista-preguntas details[open] summary::after{transform:rotate(-135deg) translate(-3px,-3px)}
+.lista-preguntas details p{padding:0 0 20px;max-width:62ch;color:#2c5961}
+.lista-preguntas a{color:var(--petroleo);font-weight:700}
+
+/* ---------- dónde ---------- */
+.donde{display:grid;gap:26px;padding:56px var(--borde) 64px;background:var(--agua)}
+.donde .mono{color:var(--abismo)}
+.donde h2{font-size:clamp(40px,11vw,84px);margin-top:10px}
+.donde-sub{margin-top:10px}
+.datos{display:grid;gap:10px;margin-top:22px}
+.datos li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding-top:10px;border-top:1px solid rgba(11,58,66,.25)}
+.datos b{font:700 13px/1.6 var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.donde-mapa{border-radius:var(--radio);overflow:hidden;min-height:300px;background:var(--agua-claro)}
+.donde-mapa iframe{display:block;width:100%;height:100%;min-height:300px;border:0;filter:saturate(.8)}
+
+/* ---------- pie y barra ---------- */
+.pie{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:36px var(--borde) calc(110px + env(safe-area-inset-bottom));font-size:15px;color:var(--petroleo)}
+.pie .logo{width:52px;height:52px}
+.pie p{color:var(--abismo)}
+.pie-links a{font-weight:700;color:var(--petroleo)}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,rgba(238,245,243,.97) 70%,rgba(238,245,243,0));transition:transform .35s cubic-bezier(.2,.9,.3,1)}
+.barra.fuera{transform:translateY(120%)}
+
+/* ---------- compu ---------- */
+@media (min-width:900px){
+  :root{--borde:max(40px,5vw);--cab:76px}
+  .marca .logo{width:46px;height:46px}
+  .marca-txt{font-size:16px}
+  .menu{display:flex;gap:28px;margin-left:36px}
+  .solo-compu{display:inline}
+  .menu a{font-weight:700;font-size:16px;text-decoration:none;opacity:.85}
+  .menu a:hover{opacity:1;text-decoration:underline;text-underline-offset:5px}
+  .btn-chico{min-height:48px;padding:0 20px;font-size:16px}
+
+  .mapa{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-rows:auto 1fr;column-gap:56px;padding:30px var(--borde) 70px}
+  .mapa-txt{grid-column:1;grid-row:1;padding-top:30px}
+  .ficha{grid-column:1;grid-row:2;align-self:start;margin-top:30px;padding:30px 30px 28px}
+  /* arriba y pegado al bajar: así el muñeco no salta cuando la ficha cambia de alto */
+  .escena{grid-column:2;grid-row:1/span 2;align-self:start;position:sticky;top:calc(var(--cab) + 24px);margin-top:60px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:8px}
+  .cuerpo{max-height:min(700px,80vh)}
+  .zona{min-height:48px;font-size:16px;padding:10px 16px}
+
+  .opiniones{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:56px;padding:100px var(--borde)}
+  .opiniones>h2,.cita-grande{grid-column:1}
+  .citas{grid-column:2;grid-row:1/span 3;margin-top:0;align-self:center}
+  .link{grid-column:1}
+
+  .turnos{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);column-gap:64px;padding:100px var(--borde)}
+  .turnos-cab{position:sticky;top:calc(var(--cab) + 40px);align-self:start}
+  .armador{margin-top:0;padding:34px 32px}
+
+  .tratamos{padding:100px var(--borde) 70px}
+  .grupos{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+
+  .preguntas{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);column-gap:64px;padding:40px var(--borde) 100px}
+  .lista-preguntas{margin-top:8px}
+
+  .donde{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;padding:90px var(--borde)}
+  .donde-mapa,.donde-mapa iframe{min-height:420px}
+  .pie{flex-direction:row;align-items:center;gap:22px;padding:40px var(--borde)}
+  .pie-links{margin-left:auto}
+  .barra{display:none!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .punto .pulso{animation:none;opacity:.3}
+  .ficha.cambia{animation:none}
+  .barra,.btn{transition:none}
+}
